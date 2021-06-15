@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+    db:
+        image: 'mysql:latest'
+        restart: always
+        container_name: mlflow_db
+        expose:
+            - "3306"
+        environment:
+            - "MYSQL_USER=${MYSQL_USER}"
+            - "MYSQL_PASSWORD=${MYSQL_PASSWORD}"
+            - "MYSQL_DATABASE=${MYSQL_DATABASE}"
+            - "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}"
+        networks:
+            - mlflow
+        command: --default-authentication-plugin=mysql_native_password
+
+    mlflow:
+        build: ./mlflow
+        image: mlflow_server
+        restart: always
+        container_name: mlflow_sever
+        depends_on:
+            - db
+        expose:
+            - "5000"
+        networks:
+            - mlflow
+        links:
+            - "db:db"
+        command: mlflow server --backend-store-uri mysql+mysqldb://$MYSQL_USER:$MYSQL_PASSWORD@db:3306/$MYSQL_DATABASE --default-artifact-root file://home/mlflow --host 0.0.0.0
+
+    nginx:
+        build: ./nginx
+        image: mlflow_proxy
+        container_name: mlflow_proxy
+        restart: always
+        depends_on:
+            - db
+            - mlflow
+        ports:
+            - "80:80"
+        networks:
+            - mlflow
+
+networks:
+    mlflow:
+        driver: bridge
