@@ -29,7 +29,7 @@ services:
             - mlflow
         links:
             - "db:db"
-        command: mlflow server --backend-store-uri mysql+mysqldb://$MYSQL_USER:$MYSQL_PASSWORD@db:3306/$MYSQL_DATABASE --default-artifact-root file://home/mlflow --host 0.0.0.0
+        command: mlflow server --backend-store-uri mysql+mysqldb://$MYSQL_USER:$MYSQL_PASSWORD@db:3306/$MYSQL_DATABASE --default-artifact-root $S#_BUCKET_NAME --host 0.0.0.0
 
     nginx:
         build: ./nginx
