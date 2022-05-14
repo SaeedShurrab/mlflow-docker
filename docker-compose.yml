@@ -5,7 +5,7 @@ services:
         image: 'mysql:latest'
         restart: always
         container_name: mlflow_db
-        expose:
+        ports:
             - "3306"
         environment:
             - "MYSQL_USER=${MYSQL_USER}"
@@ -23,14 +23,32 @@ services:
         container_name: mlflow_sever
         depends_on:
             - db
-        expose:
+        ports:
             - "5000"
         networks:
             - mlflow
         links:
             - "db:db"
         command: mlflow server --backend-store-uri mysql+mysqldb://$MYSQL_USER:$MYSQL_PASSWORD@db:3306/$MYSQL_DATABASE --default-artifact-root $S3_BUCKET_NAME --host 0.0.0.0
-
+    
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        restart: always
+        container_name: php_agent
+        depends_on:
+            - db
+        ports:
+            - "8081:80"
+        networks:
+            - mlflow
+        environment:
+            - "PMA_HOST=${PMA_HOST}"
+            - "PMA_PORT=${PMA_PORT}"
+            - "PMA_USER=${MYSQL_USER}"
+            - "PMA_PASSWORD=${MYSQL_PASSWORD}"
+            - "PMA_PMADB=mlflow_db"
+                 
+       
     nginx:
         build: ./nginx
         image: mlflow_proxy
@@ -43,6 +61,8 @@ services:
             - "80:80"
         networks:
             - mlflow
+            
+
 
 networks:
     mlflow:
