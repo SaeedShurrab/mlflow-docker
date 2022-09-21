@@ -1,0 +1,48 @@
+1- strat ec2 instance with full access to s3
+2- connect via ssh
+3- isntall nginx
+4- start ngninx server: sudo systemctl start nginx
+4- configure nginx:
+	a- sudo nano /etc/nginx/nginx.conf
+	b- under server configuration:
+		remove all configuration under server name until the second curly bracket
+	c- add the routing loacation as follow:
+		location / { proxy_pass http://localhost:5000;}
+	d- sava the new configuration
+	e- restart nginx: sudo systemctl restart nginx
+
+5- install mlflow: sudo pip3 install mlflow
+6- install awscli: sudo pip3 install awscli
+7- install boto3:  sudo pip3 install boto3
+
+8- go through step 8 if you do not have full access over S3 from ec2
+
+8- configure aws cli:
+	a- aws configure:
+		ID: Your programatic access id 
+		Key: your programatic access key
+		region: region at which the instance operate
+		output format: json
+		
+
+9- launch the mlflow server and specify the S3 Bucket to store artifacts on:
+	mlflow server --host 0.0.0.0 --default-artifact-root s3://trainingoutput2021/logs1/
+	
+10- copy the puplic ec2 ip or DNS addresses and paste it to your browser:
+	x.xx.xx.xxx:5000
+	
+11- Congratulation you have succefully setup mlflow on ec2 with s3 artifact store.
+
+12- setup the tarcking uri in your training code using the ec2 instanc puplic DNS address as follow:
+	mlflow.set_tracking_uri('http://ec2-x-xx-xx-xxx.us-east-2.compute.amazonaws.com:5000/')
+
+13- ensure that boto3 is installed where training code is hosted
+
+14- export your aws credentials where your training code is hosted:
+	export AWS_ACCESS_KEY_ID=<your-aws-access-key-id>
+	export AWS_SECRET_ACCESS_KEY=<your-aws-secret-access-key>
+ 
+
+
+
+
